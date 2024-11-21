@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            color: #FF6F61;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #6A5ACD;
+            color: #fff;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #5a4bc0;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        a {
+            color: #6A5ACD;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Attendance Management</h1>
+        <form action="/add_attendance" method="post">
+            <label for="employee_id">Employee ID:</label>
+            <input type="text" id="employee_id" name="employee_id" required placeholder="Enter Employee ID">
+
+            <label for="attendance_status">Attendance Status:</label>
+            <select id="attendance_status" name="attendance_status">
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+            </select>
+
+            <button type="submit">Submit Attendance</button>
+        </form>
+
+        <div class="links">
+            <a href="/view_attendance">View All Attendance Records</a><br>
+            <a href="/validate">Validate Blockchain</a>
+        </div>
+    </div>
+</body>
+</html>

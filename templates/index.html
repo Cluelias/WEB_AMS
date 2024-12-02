@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #f8f9fa, #d4e0f0);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #6A5ACD;
+            margin-bottom: 30px;
+        }
+
+        .user-choice {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .user-choice input[type="radio"] {
+            display: none;
+        }
+
+        .user-choice label {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #6A5ACD;
+            border-radius: 30px;
+            transition: 0.3s;
+            color: #6A5ACD;
+        }
+
+        .user-choice input[type="radio"]:checked + label {
+            background-color: #6A5ACD;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+            background: #f4f6f9;
+        }
+
+        .form-group svg {
+            position: absolute;
+            top: 14px;
+            left: 10px;
+            color: #6A5ACD;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #6A5ACD;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .login-button:hover {
+            background-color: #5846c9;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+
+        <div class="user-choice">
+            <div>
+                <input type="radio" id="employee" name="user-type" value="employee" checked>
+                <label for="employee">Employee</label>
+            </div>
+            <div>
+                <input type="radio" id="admin" name="user-type" value="admin">
+                <label for="admin">Admin</label>
+            </div>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <input type="text" id="id-field" name="id" placeholder="Employee Email or ID" required>
+            </div>
+
+            <div class="form-group">
+                <input type="password" id="password-field" name="password" placeholder="Password" required>
+            </div>
+
+            <button type="button" class="login-button" onclick="login()">Log In</button>
+        </form>
+    </div>
+
+    <script>
+        const idField = document.getElementById("id-field");
+        const employeeLabel = document.querySelector('label[for="employee"]');
+        const adminLabel = document.querySelector('label[for="admin"]');
+
+        document.getElementById("employee").addEventListener("change", function() {
+            idField.placeholder = "Employee Email or ID";
+        });
+
+        document.getElementById("admin").addEventListener("change", function() {
+            idField.placeholder = "Admin Email or ID";
+        });
+
+        function login() {
+            const userType = document.querySelector('input[name="user-type"]:checked').value;
+            const idFieldValue = document.getElementById("id-field").value;
+            const passwordFieldValue = document.getElementById("password-field").value;
+
+            if (userType === "admin") {
+                if (idFieldValue === "12345678" && passwordFieldValue === "12345678") {
+                    window.location.href = "admin_dashboard"; 
+                } else {
+                    alert("Invalid Admin ID or Password");
+                }
+            } else if (userType === "employee") {
+                alert("Employee login not implemented yet.");
+            } else {
+                alert("Please select a user type.");
+            }
+        }
+    </script>>
+</body>
+</html>

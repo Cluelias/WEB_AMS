@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
+    <style>
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #f4f6f9, #e1e7f3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+
+        .dashboard-container {
+            text-align: center;
+            background: #fff;
+            padding: 40px 60px;
+            border-radius: 16px;
+            box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-container:hover {
+            box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+
+        h1 {
+            color: #4B9E9A;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+
+        .button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4B9E9A;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin: 10px;
+        }
+
+        .button:hover {
+            background-color: #3e8e8c;
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(2px);
+        }
+
+
+        #clock-in-out-container {
+            display: none;
+            margin-top: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #employee-id-input {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        /* QR scanner styling */
+        #qr-container {
+            margin-top: 20px;
+            background-color: #fafafa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        #webcam {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 20px 30px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Welcome, Admin!</h1>
+        <p>Manage Clock-in/Out settings below:</p>
+        <button class="button" onclick="toggleClockInOut(true)">Enable Clock-in/Out</button>
+        <button class="button" onclick="toggleClockInOut(false)">Disable Clock-in/Out</button>
+
+        <div id="clock-in-out-container">
+            <h2>Clock-in/Out Feature</h2>
+            <p>Scan a QR code or enter Employee ID.</p>
+            <input type="text" id="employee-id-input" placeholder="Enter Employee ID">
+            <button class="button" onclick="manualClockIn()">Submit ID</button>
+
+            <div id="qr-container">
+                <button class="button" onclick="startQRScan()">Scan QR Code</button>
+                <div id="qr-reader" style="margin-top: 20px;">
+                    <video id="webcam" autoplay></video>
+                    <canvas id="qr-canvas" style="display: none;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleClockInOut(enable) {
+            fetch('/toggle_clock_in_out', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enable })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('clock-in-out-container');
+                container.style.display = enable ? 'block' : 'none';
+            });
+        }
+
+        function manualClockIn() {
+            const employeeId = document.getElementById('employee-id-input').value;
+            if (employeeId) {
+                alert("Clocking in for Employee ID: " + employeeId);
+                clockIn(employeeId);
+            } else {
+                alert("Please enter an Employee ID.");
+            }
+        }
+
+        function clockIn(employeeId) {
+            fetch('/clock_in', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employee_qr_data: employeeId })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+
+        function startQRScan() {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('qr-canvas');
+            const ctx = canvas.getContext('2d');
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true);
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        scanQRCode();
+                    };
+                })
+                .catch(err => {
+                    alert("Error: " + err.message);
+                });
+
+            function scanQRCode() {
+                if (video.videoWidth === 0 || video.videoHeight === 0) {
+                    return requestAnimationFrame(scanQRCode);
+                }
+
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, canvas.width, canvas.height, {
+                    inversionAttempts: "dontInvert"
+                });
+
+                if (code) {
+                    const scannedData = code.data.trim();
+                    if (scannedData === "admin:secure-dashboard") {
+                        alert("Admin QR Code recognized! Redirecting to manage employees...");
+                        window.location.href = "/manage_employees";  
+                    } else if (scannedData.startsWith("employee:")) {
+                        fetch('/clock_in', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ employee_qr_data: scannedData })
+                        })
+                        .then(response => response.json())
+                        .then(data => alert(data.message))
+                        .catch(err => alert("Error clocking in: " + err));
+                    } else {
+                        alert("Invalid QR Code.");
+                    }
+                } else {
+                    requestAnimationFrame(scanQRCode);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

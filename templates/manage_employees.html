@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Employees</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='components/admin_sidebar.css') }}">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f4f7fc;
-            padding: 20px;
             margin: 0;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
         }
 
         .container {
@@ -26,6 +32,14 @@
             color: #4B9E9A;
             margin-bottom: 20px;
             font-size: 32px;
+        }
+		.button:hover {
+            background-color: #3e8e8c;
+            transform: translateY(-3px);
+        }
+
+        .button:active {
+            transform: translateY(2px);
         }
 
         form {
@@ -114,6 +128,14 @@
         }
 
         @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
             form {
                 flex-direction: column;
                 gap: 15px;
@@ -130,57 +152,73 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Manage Employees</h1>
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+        <div class="container">
+            <h1>Manage Employees</h1>
 
-        <form method="POST" action="/manage_employees">
-            <input type="text" name="name" placeholder="Employee Name" required>
-            <input type="email" name="email" placeholder="Employee Email" required>
-            <button type="submit">Add Employee</button>
-        </form>
+            <form method="POST" action="/manage_employees">
+                <input type="text" name="name" placeholder="Employee Name" required>
+                <input type="email" name="email" placeholder="Employee Email" required>
+                <button type="submit">Add Employee</button>
+            </form>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                    <th>Clock In</th>
-                    <th>Clock Out</th>
-                    <th>QR Code</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if employees %}
-                    {% for employee in employees %}
-                        <tr>
-                            <td>{{ employee[0] }}</td>
-                            <td>{{ employee[1] }}</td>
-                            <td>{{ employee[2] }}</td>
-                            <td>{{ employee[3] if employee[3] else 'N/A' }}</td>
-                            <td>{{ employee[4] if employee[4] else 'N/A' }}</td>
-                            <td>{{ employee[5] if employee[5] else 'N/A' }}</td>
-                            <td>
-                                <a href="{{ url_for('download_qr_code', uid=employee[0]) }}" download="{{ employee[0] }}_qrcode.png">
-                                    <button class="download-btn">Download QR Code</button>
-                                </a>
-                            </td>
-                            <td>
-                                <form method="POST" action="/delete_employee/{{ employee[0] }}">
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
+            <table>
+                <thead>
                     <tr>
-                        <td colspan="8" style="text-align: center;">No employees added yet.</td>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Date</th>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>QR Code</th>
+                        <th>Actions</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% if employees %}
+                        {% for employee in employees %}
+                            <tr>
+                                <td>{{ employee[0] }}</td>
+                                <td>{{ employee[1] }}</td>
+                                <td>{{ employee[2] }}</td>
+                                <td>{{ employee[3] if employee[3] else 'N/A' }}</td>
+                                <td>{{ employee[4] if employee[4] else 'N/A' }}</td>
+                                <td>{{ employee[5] if employee[5] else 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('download_qr_code', uid=employee[0]) }}" download="{{ employee[0] }}_qrcode.png">
+                                        <button class="download-btn">Download QR Code</button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <form method="POST" action="/delete_employee/{{ employee[0] }}">
+                                        <button type="submit" class="delete-btn">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" style="text-align: center;">No employees added yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
+	<script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/static/components/admin_sidebar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('sidebar-container').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error("Error loading sidebar:", error);
+                    alert("Sidebar failed to load!");
+                });
+        });
+    </script>
 </body>
 </html>

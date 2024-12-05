@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='components/employee_sidebar.css') }}">
+<script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <title>Employee Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            transition: margin-left 0.3s;
+        }
+
+        .main-content h1 {
+            font-size: 28px;
+            color: #34495e;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .main-content .section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .main-content .section:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .main-content .section h2 {
+            font-size: 20px;
+            margin: 0 0 10px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .main-content .section p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background-color: #4B9E9A;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:hover {
+            background-color: #3e8e8c;
+            transform: translateY(-3px);
+        }
+
+        .button:active {
+            transform: translateY(2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-around;
+                overflow-x: auto;
+            }
+
+            .sidebar h2 {
+                display: none;
+            }
+
+            .sidebar a {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+		
+		.notification {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+            display: none; /* Initially hidden */
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .notification.show {
+            display: block;
+            opacity: 1;
+        }
+        }
+    </style>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+
+    <div class="main-content">
+        <h1>Welcome, Employee!</h1>
+        <div class="section">
+            <h2>Dashboard Overview</h2>
+            <p>This is your central dashboard where you can find quick links to your leave requests, pay slips, attendance history, and more.</p>
+        </div>
+        <div id="notifications">
+            <h3>Notifications</h3>
+         
+        </div>
+        <div class="section">
+            <h2>Request Leave</h2>
+            <p>Submit your leave requests here and track their approval status.</p>
+            <button class="button"><a href="/request_leave" style="color:white; text-decoration:none;">Request Leave</a></button>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/static/components/employee_sidebar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('sidebar-container').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error("Error loading sidebar:", error);
+                    alert("Sidebar failed to load!");
+                });
+
+            const socket = io(); 
+
+           
+            socket.on('leave_status_update', function (data) {
+                alert(`Leave Request Update: Your request for ${data.leave_type} (${data.start_date} to ${data.end_date}) has been ${data.status}.`);
+             
+            });
+        });
+    </script>
+</body>
+
+</html>

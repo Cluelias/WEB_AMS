@@ -3,68 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="{{ url_for('static', filename='components/admin_sidebar.css') }}">
     <title>Admin Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
     <style>
-
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom, #f4f6f9, #e1e7f3);
             display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
-            color: #333;
+            overflow: hidden;
+        }
+  
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+           
+            transition: margin-left 0.3s;
         }
 
-
-        .dashboard-container {
-            text-align: center;
-            background: #fff;
-            padding: 40px 60px;
-            border-radius: 16px;
-            box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .dashboard-container:hover {
-            box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
-        }
-
-
-        h1 {
-            color: #4B9E9A;
+        .main-content h1 {
             font-size: 28px;
+            color: #34495e;
             margin-bottom: 20px;
         }
 
+        .main-content .section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-        .button {
-            padding: 12px 24px;
+        .main-content .section h2 {
+            font-size: 20px;
+            margin: 0 0 10px;
+            color: #2c3e50;
+        }
+
+        .main-content .section p {
+            color: #555;
             font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background-color: #4B9E9A;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            margin: 10px;
+            line-height: 1.5;
         }
 
-        .button:hover {
-            background-color: #3e8e8c;
-            transform: translateY(-2px);
-        }
-
-        .button:active {
-            transform: translateY(2px);
-        }
-
-
+ 
         #clock-in-out-container {
             display: none;
             margin-top: 30px;
@@ -72,25 +62,54 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
         }
 
         #employee-id-input {
-            padding: 10px;
-            font-size: 16px;
+            padding: 15px;
+            font-size: 18px;
             width: 100%;
             max-width: 300px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 8px;
             box-sizing: border-box;
+            transition: border 0.3s ease-in-out;
         }
 
-        /* QR scanner styling */
+        #employee-id-input:focus {
+            border-color: #1abc9c;
+            box-shadow: 0 0 8px rgba(26, 188, 156, 0.6);
+        }
+
+        .button {
+            padding: 15px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4B9E9A;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:hover {
+            background-color: #3e8e8c;
+            transform: translateY(-3px);
+        }
+
+        .button:active {
+            transform: translateY(2px);
+        }
+     
         #qr-container {
             margin-top: 20px;
             background-color: #fafafa;
             border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         #webcam {
@@ -99,41 +118,56 @@
             border-radius: 10px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
+     
+        #qr-canvas {
+            display: none;
+        }
 
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 20px 30px;
+      
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
             }
-            h1 {
-                font-size: 24px;
+            100% {
+                opacity: 1;
             }
         }
+        
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
+   <div id="sidebar-container"></div>
+</div>
+    <div class="main-content">
         <h1>Welcome, Admin!</h1>
-        <p>Manage Clock-in/Out settings below:</p>
+        <p>Manage the clock-in/out settings below:</p>
         <button class="button" onclick="toggleClockInOut(true)">Enable Clock-in/Out</button>
         <button class="button" onclick="toggleClockInOut(false)">Disable Clock-in/Out</button>
 
         <div id="clock-in-out-container">
-            <h2>Clock-in/Out Feature</h2>
-            <p>Scan a QR code or enter Employee ID.</p>
-            <input type="text" id="employee-id-input" placeholder="Enter Employee ID">
-            <button class="button" onclick="manualClockIn()">Submit ID</button>
 
             <div id="qr-container">
                 <button class="button" onclick="startQRScan()">Scan QR Code</button>
                 <div id="qr-reader" style="margin-top: 20px;">
                     <video id="webcam" autoplay></video>
-                    <canvas id="qr-canvas" style="display: none;"></canvas>
+                    <canvas id="qr-canvas"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/static/components/admin_sidebar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('sidebar-container').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error("Error loading sidebar:", error);
+                    alert("Sidebar failed to load!");
+                });
+        });
         function toggleClockInOut(enable) {
             fetch('/toggle_clock_in_out', {
                 method: 'POST',
@@ -147,16 +181,7 @@
             });
         }
 
-        function manualClockIn() {
-            const employeeId = document.getElementById('employee-id-input').value;
-            if (employeeId) {
-                alert("Clocking in for Employee ID: " + employeeId);
-                clockIn(employeeId);
-            } else {
-                alert("Please enter an Employee ID.");
-            }
-        }
-
+        
         function clockIn(employeeId) {
             fetch('/clock_in', {
                 method: 'POST',
@@ -202,8 +227,8 @@
                 if (code) {
                     const scannedData = code.data.trim();
                     if (scannedData === "admin:secure-dashboard") {
-                        alert("Admin QR Code recognized! Redirecting to manage employees...");
-                        window.location.href = "/manage_employees";  
+                        alert("Admin QR Code recognized! Clocked In...");
+                  
                     } else if (scannedData.startsWith("employee:")) {
                         fetch('/clock_in', {
                             method: 'POST',
